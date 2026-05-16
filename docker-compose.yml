@@ -1,0 +1,27 @@
+services:
+  ghost:
+    image: ghost:5-alpine
+    ports:
+      - "2368:2368"
+    volumes:
+      - ${GHOST_DATA_PATH:-./ghost-data}:/var/lib/ghost/content
+    environment:
+      - HOST=0.0.0.0
+      - URL=http://localhost:2368
+    restart: unless-stopped
+
+  astro:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    ports:
+      - "4321:4321"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - GHOST_URL=http://ghost:2368
+    depends_on:
+      - ghost
+    command: pnpm run dev -- --host 0.0.0.0
